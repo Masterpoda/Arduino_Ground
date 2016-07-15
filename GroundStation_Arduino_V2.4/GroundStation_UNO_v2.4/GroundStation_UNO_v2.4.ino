@@ -1,4 +1,4 @@
-m/*
+/*
  * Author: Dylan Trafford (EE/CpE), Trevor Gahl (CpE), Gabe Gordon (MSGC MAP Student). Adapted from example code from Adafruit.com
  * Developed for use by MSGC BOREALIS Program
  * Date of Last Edit: 05/10/2016
@@ -30,6 +30,8 @@ Adafruit_GPS GPS(&mySerial);                                //Initializes an ins
 //Global Intializations
 boolean usingInterrupt = true;                              //Use an interrupt to parce GPS data (preferred to be true)
 boolean calibrated = false;
+int initial = false;
+
 
 void setup() {
   // put your setup code here, to run once:
@@ -75,11 +77,11 @@ void useInterrupt(boolean v) {                              //turns the interrup
 void loop() {
   lcd.setCursor(0,1);                                               //Main code, loops continuously
   float x,y,z;
+  imu::Vector<3> euler = bno.getVector(Adafruit_BNO055::VECTOR_EULER);
   x = euler.x();                                                      //Creates Euler Vectors for the x, y, and z axis
   y = euler.y();
   z = euler.z();
 
-  imu::Vector<3> euler = bno.getVector(Adafruit_BNO055::VECTOR_EULER);
   sensors_event_t event;                                    //Create a new local event instance.... called event
   
   
@@ -118,7 +120,9 @@ void loop() {
   }
 
   else{
-        delay(5000);
+      if(initial == false){
+        delay(7000);
+      }
         Serial.print("~");                                        //Transmit data over serial leading with a '~' and ending with '\n'
         Serial.print(",");
         Serial.print(GPS.latitudeDegrees,7);
@@ -151,6 +155,7 @@ void loop() {
         lcd.setCursor(3,1);
         lcd.print(z);
         calibrated = true;
+        initial = true;
   }
 
   delay(500);                                               //Wait for 0.5s
