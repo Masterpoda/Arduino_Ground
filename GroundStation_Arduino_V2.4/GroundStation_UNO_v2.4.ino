@@ -1,4 +1,4 @@
-/*
+m/*
  * Author: Dylan Trafford (EE/CpE), Trevor Gahl (CpE), Gabe Gordon (MSGC MAP Student). Adapted from example code from Adafruit.com
  * Developed for use by MSGC BOREALIS Program
  * Date of Last Edit: 05/10/2016
@@ -74,16 +74,20 @@ void useInterrupt(boolean v) {                              //turns the interrup
 
 void loop() {
   lcd.setCursor(0,1);                                               //Main code, loops continuously
-  sensors_event_t event;                                    //Create a new local event instance.... called event
   float x,y,z;
-  imu::Vector<3> euler = bno.getVector(Adafruit_BNO055::VECTOR_EULER);
-  //Get IMU position
-  uint8_t system, gyro, accel, mag;                         //Create local variables gyro, accel, mag
-  system = gyro = accel = mag = 0;                          //Initialize them to zeros
   x = euler.x();                                                      //Creates Euler Vectors for the x, y, and z axis
   y = euler.y();
   z = euler.z();
-  if(calibrated == false){
+
+  imu::Vector<3> euler = bno.getVector(Adafruit_BNO055::VECTOR_EULER);
+  sensors_event_t event;                                    //Create a new local event instance.... called event
+  
+  
+  //Get IMU position
+  uint8_t system, gyro, accel, mag;                         //Create local variables gyro, accel, mag
+  system = gyro = accel = mag = 0;                          //Initialize them to zeros
+  
+ if(calibrated == false){
   bno.getCalibration(&system, &gyro, &accel, &mag);         //Read the calibration values from the IMU
   bno.getEvent(&event);
   lcd.setCursor(0,0);   
@@ -108,28 +112,30 @@ void loop() {
   Serial.print(",");
   Serial.print("Mag: ");
   Serial.println(mag, DEC);
+    if(bno.isFullyCalibrated()){
+      calibrated = true;
+    }
+  }
 
-    if(bno.isFullyCalibrated()){                                                //Get a new event and store it to... event
-  			delay(5000);
-  			Serial.print("~");                                        //Transmit data over serial leading with a '~' and ending with '\n'
-  			Serial.print(",");
-        //Serial.println(GPS.fix);
-        //Serial.println(GPS.satellites);
-  			Serial.print(GPS.latitudeDegrees,7);
-  			Serial.print(",");
-  			Serial.print(GPS.longitudeDegrees,7);
-  			Serial.print(",");
-  			Serial.print(GPS.altitude * 3.28084);
-  			Serial.print(",");
-  			Serial.print(event.orientation.x,2);
-  			Serial.print(",");
-  			Serial.print(system);
-  			Serial.print(",");
-  			Serial.print(gyro);
-  			Serial.print(",");
-  			Serial.print(accel);
-  			Serial.print(",");
-  			Serial.println(mag);
+  else{
+        delay(5000);
+        Serial.print("~");                                        //Transmit data over serial leading with a '~' and ending with '\n'
+        Serial.print(",");
+        Serial.print(GPS.latitudeDegrees,7);
+        Serial.print(",");
+        Serial.print(GPS.longitudeDegrees,7);
+        Serial.print(",");
+        Serial.print(GPS.altitude * 3.28084);
+        Serial.print(",");
+        Serial.print(event.orientation.x,2);
+        Serial.print(",");
+        Serial.print(system);
+        Serial.print(",");
+        Serial.print(gyro);
+        Serial.print(",");
+        Serial.print(accel);
+        Serial.print(",");
+        Serial.println(mag);
 
         lcd.clear();
         lcd.setCursor(0,0);                                                 //prints angle values to an LCD screen
@@ -144,8 +150,9 @@ void loop() {
         lcd.print("Z:");
         lcd.setCursor(3,1);
         lcd.print(z);
-  			calibrated = true;
-      	}	
+        calibrated = true;
+  }
+
   delay(500);                                               //Wait for 0.5s
   
     if (!usingInterrupt) {                                    //If interrupt is not being used, the GPS data needs to be checked for parse here.
@@ -157,6 +164,5 @@ void loop() {
 
     if (!GPS.parse(GPS.lastNMEA()))
       return;
-  }
   }
 }
