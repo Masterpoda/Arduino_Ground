@@ -1,4 +1,4 @@
-m/*
+/*
  * Author: Dylan Trafford (EE/CpE), Trevor Gahl (CpE), Gabe Gordon (MSGC MAP Student). Adapted from example code from Adafruit.com
  * Developed for use by MSGC BOREALIS Program
  * Date of Last Edit: 05/10/2016
@@ -69,16 +69,23 @@ void useInterrupt(boolean v) {                              //turns the interrup
   } else {
     TIMSK0 &= ~_BV(OCIE0A);
     usingInterrupt = false;
+    lcd.setCursor(0,0);     
+    lcd.print("Calibrating...");                                     
+  
+  
   }
 }
 
 void loop() {
+  
+  
   lcd.setCursor(0,1);                                               //Main code, loops continuously
   float x,y,z;
+ /* 
   x = euler.x();                                                      //Creates Euler Vectors for the x, y, and z axis
   y = euler.y();
   z = euler.z();
-
+ */
   imu::Vector<3> euler = bno.getVector(Adafruit_BNO055::VECTOR_EULER);
   sensors_event_t event;                                    //Create a new local event instance.... called event
   
@@ -90,8 +97,12 @@ void loop() {
  if(calibrated == false){
   bno.getCalibration(&system, &gyro, &accel, &mag);         //Read the calibration values from the IMU
   bno.getEvent(&event);
-  lcd.setCursor(0,0);   
-  lcd.print("Calibrating...");                                           //Will continually read calibration values until "calibrated" is set to true
+  lcd.setCursor(0,0);  
+  lcd.print("fix?: ");
+  lcd.print(GPS.fix);
+  lcd.print(" sats:");
+  lcd.print(GPS.satellites);
+  lcd.print("    ");
   lcd.setCursor(0,1);
   lcd.print("S:");
   lcd.print(system,DEC);
@@ -118,7 +129,7 @@ void loop() {
   }
 
   else{
-        delay(5000);
+        delayMicroseconds(5000);
         Serial.print("~");                                        //Transmit data over serial leading with a '~' and ending with '\n'
         Serial.print(",");
         Serial.print(GPS.latitudeDegrees,7);
@@ -129,6 +140,9 @@ void loop() {
         Serial.print(",");
         Serial.print(event.orientation.x,2);
         Serial.print(",");
+        //only meant to see if there is a satellite when at this part of the loop. if looking directly at the Serial comment out.
+      0 //Serial.print("   Fix?: "); Serial.print(GPS.fix);
+        //Serial.print("  Sats:"); Serial.print(GPS.satellites); Serial.print("  ,");
         Serial.print(system);
         Serial.print(",");
         Serial.print(gyro);
@@ -141,15 +155,15 @@ void loop() {
         lcd.setCursor(0,0);                                                 //prints angle values to an LCD screen
         lcd.print("X:");
         lcd.setCursor(3,0);
-        lcd.print(x);
+        lcd.print(euler.x());
         lcd.setCursor(8,0);
         lcd.print(" Y:");
         lcd.setCursor(11,0);
-        lcd.print(y);
+        lcd.print(euler.y());
         lcd.setCursor(0,1);
         lcd.print("Z:");
         lcd.setCursor(3,1);
-        lcd.print(z);
+        lcd.print(euler.z());
         calibrated = true;
   }
 
