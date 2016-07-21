@@ -30,6 +30,8 @@ Adafruit_GPS GPS(&mySerial);                                //Initializes an ins
 //Global Intializations
 boolean usingInterrupt = true;                              //Use an interrupt to parce GPS data (preferred to be true)
 boolean calibrated = false;
+int baccel, bgyro, bsystem, bmag;                           //BNO055 resets its values after reading from them so this is to read it.
+
 
 void setup() {
   // put your setup code here, to run once:
@@ -39,6 +41,8 @@ void setup() {
   {
     /* There was a problem detecting the BNO055 ... check your connections */
     Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
+    lcd.setCursor(0,0);                                     //just some visual feedback
+    lcd.print("BNO055 missing!");
     while(1);
   }
   GPS.begin(9600);                                          //Launches a software serial connection to the GPS at a baud rate of 9600
@@ -93,10 +97,11 @@ void loop() {
   //Get IMU position
   uint8_t system, gyro, accel, mag;                         //Create local variables gyro, accel, mag
   system = gyro = accel = mag = 0;                          //Initialize them to zeros
-  
- if(calibrated == false){
   bno.getCalibration(&system, &gyro, &accel, &mag);         //Read the calibration values from the IMU
   bno.getEvent(&event);
+ if(calibrated == false){
+  //bno.getCalibration(&system, &gyro, &accel, &mag);         //Read the calibration values from the IMU
+  //bno.getEvent(&event);
   lcd.setCursor(0,0);  
   lcd.print("fix?: ");
   lcd.print(GPS.fix);
@@ -141,17 +146,36 @@ void loop() {
         Serial.print(event.orientation.x,2);
         Serial.print(",");
         //only meant to see if there is a satellite when at this part of the loop. if looking directly at the Serial comment out.
-      0 //Serial.print("   Fix?: "); Serial.print(GPS.fix);
+        //Serial.print("   Fix?: "); Serial.print(GPS.fix);
         //Serial.print("  Sats:"); Serial.print(GPS.satellites); Serial.print("  ,");
-        Serial.print(system);
+
+
+        
+        Serial.print(system, DEC);
         Serial.print(",");
-        Serial.print(gyro);
+        Serial.print(gyro, DEC);
         Serial.print(",");
-        Serial.print(accel);
+        Serial.print(accel, DEC);
         Serial.print(",");
-        Serial.println(mag);
+        Serial.println(mag, DEC);
 
         lcd.clear();
+        
+        
+        //testing the values of the accelerameter since at one point, 
+        /*
+        lcd.setCursor(0,0);
+        lcd.print(system);
+        lcd.print(",");
+        lcd.print(gyro);
+        lcd.print(",");
+        lcd.print(accel);
+        lcd.print(",");
+        lcd.println(mag);
+        */
+        
+        
+        //this is what we want to see while running the ground station
         lcd.setCursor(0,0);                                                 //prints angle values to an LCD screen
         lcd.print("X:");
         lcd.setCursor(3,0);
@@ -164,6 +188,7 @@ void loop() {
         lcd.print("Z:");
         lcd.setCursor(3,1);
         lcd.print(euler.z());
+        
         calibrated = true;
   }
 
