@@ -88,10 +88,11 @@ void loop() {
   //Get IMU position
   uint8_t system, gyro, accel, mag;                         //Create local variables gyro, accel, mag
   system = gyro = accel = mag = 0;                          //Initialize them to zeros
-  
- if(calibrated == false){
   bno.getCalibration(&system, &gyro, &accel, &mag);         //Read the calibration values from the IMU
   bno.getEvent(&event);
+
+  
+ if(calibrated == false){
   lcd.setCursor(0,0);   
   lcd.print("Calibrating...");                                           //Will continually read calibration values until "calibrated" is set to true
   lcd.setCursor(0,1);
